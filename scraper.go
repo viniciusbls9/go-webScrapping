@@ -3,8 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"os"
+	"net/http"
 
+	"github.com/go-chi/chi"
 	"github.com/gocolly/colly"
 )
 
@@ -15,7 +16,8 @@ type item struct {
 	ProductUrl 	string `json:"producturl"`
 }
 
-func scrapper() {
+func scrapper(responseWritter http.ResponseWriter, request *http.Request) {
+	productName := chi.URLParam(request, "productName")
 	c := colly.NewCollector(
 		colly.AllowedDomains("lista.mercadolivre.com.br"),
 	)
@@ -33,14 +35,15 @@ func scrapper() {
 		items = append(items, item)
 	})
 
-	c.Visit("https://lista.mercadolivre.com.br/iphone-13s-pro-max")
+	c.Visit("https://lista.mercadolivre.com.br/"+productName)
 	
 	content, err := json.Marshal(items)
 
 	if err != nil {
-		fmt.Println(err.Error())
+		respondWithError(responseWritter, 400, fmt.Sprintf("Couldn't scrappe product: %v", err))
 	}
 
-	os.WriteFile("products.json", content, 0644)
+	handlerSaveProducts(responseWritter, request, content, productName)
+	respondWithJSON(responseWritter, 200, items)
 
 }
