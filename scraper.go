@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -19,27 +18,9 @@ type item struct {
 
 func scrapper(responseWritter http.ResponseWriter, request *http.Request) {
 	productName := chi.URLParam(request, "productName")
-	c := colly.NewCollector(
-		colly.AllowedDomains("lista.mercadolivre.com.br"),
-	)
+	c := colly.NewCollector()
 
-	var items []item
-
-	c.OnHTML("div.ui-search-result--core", func(h *colly.HTMLElement) {
-		item := item{
-			Name: h.ChildText("h2.ui-search-item__title"),
-			FromPrice: h.ChildText(".ui-search-price__original-value .andes-money-amount__fraction"),
-			ToPrice: h.ChildText("span.ui-search-price__part--medium span.andes-money-amount__fraction"),
-			ImgUrl: h.ChildAttr("img", "src"),
-			ProductUrl: h.ChildAttr("a.ui-search-link", "href"),
-		}
-
-		items = append(items, item)
-	})
-
-	c.Visit("https://lista.mercadolivre.com.br/"+productName)
-	
-	content, err := json.Marshal(items)
+	content, items, err := handlerGirafaScrapper(c, productName)
 
 	if err != nil {
 		respondWithError(responseWritter, 400, fmt.Sprintf("Couldn't scrappe product: %v", err))
