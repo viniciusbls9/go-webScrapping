@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/go-chi/chi"
 	"github.com/joho/godotenv"
 )
 
@@ -16,7 +17,8 @@ func main() {
 		log.Fatal("PORT is not found in the env")
 	}
 
-	router := handlerRouters()
+	router := chi.NewRouter()
+	handlerRouters(router)
 
 	srv := &http.Server{
 		Handler: router,
