@@ -20,7 +20,7 @@ func scrapper(responseWritter http.ResponseWriter, request *http.Request) {
 	productName := chi.URLParam(request, "productName")
 	c := colly.NewCollector()
 
-	content, items, err := handlerGirafaScrapper(c, productName)
+	content, items, err := handlerFastScrapper(c, productName)
 
 	if err != nil {
 		respondWithError(responseWritter, 400, fmt.Sprintf("Couldn't scrappe product: %v", err))
