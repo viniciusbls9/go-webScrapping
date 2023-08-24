@@ -9,19 +9,19 @@ import (
 func handlerFastScrapper(c *colly.Collector, productName string) ([]byte, []item, error) {
 	var items []item
 
-	c.OnHTML("div.category-list", func(h *colly.HTMLElement) {
+	c.OnHTML("div.ui-search-result--core", func(h *colly.HTMLElement) {
 		item := item{
-			Name: h.ChildText("h3.horizontal-grid-short-description"),
-			FromPrice: h.ChildText("span.value"),
-			ToPrice: h.ChildText("span.price-fraction"),
-			ImgUrl: h.ChildAttr("img.grid-image", "src"),
-			ProductUrl: h.ChildAttr("a", "href"),
+			Name: h.ChildText("h2.ui-search-item__title"),
+			FromPrice: h.ChildText(".ui-search-price__original-value .andes-money-amount__fraction"),
+			ToPrice: h.ChildText("span.ui-search-price__part--medium span.andes-money-amount__fraction"),
+			ImgUrl: h.ChildAttr("img", "src"),
+			ProductUrl: h.ChildAttr("a.ui-search-link", "href"),
 		}
 
 		items = append(items, item)
 	})
 
-	err := c.Visit("https://www.fastshop.com.br/web/s/"+productName)
+	err := c.Visit("https://lista.mercadolivre.com.br/"+productName)
 	if err != nil {
 		return nil, nil, err
 	}
